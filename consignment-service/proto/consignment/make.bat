@@ -1,0 +1,1 @@
+protoc consignment.proto --go_out=plugins=grpc:.
