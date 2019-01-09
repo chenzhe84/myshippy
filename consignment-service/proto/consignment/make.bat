@@ -1,1 +1,1 @@
-protoc consignment.proto --go_out=plugins=grpc:.
+protoc consignment.proto --micro_out=.

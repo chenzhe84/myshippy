@@ -1,0 +1,1 @@
+protoc vessel.proto --micro_out=.

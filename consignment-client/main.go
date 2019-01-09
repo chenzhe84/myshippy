@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"encoding/json"
+	microclient "github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/cmd"
 	pb "github.com/myshippy/consignment-service/proto/consignment"
-	"google.golang.org/grpc"
+	//"google.golang.org/grpc"
 	"io/ioutil"
 	"log"
 )
 
 const (
-	address         = "localhost:50050"
 	defaultFilename = "consignment.json"
 )
 
@@ -25,25 +26,21 @@ func parseFile(f string) (*pb.Consignment, error) {
 }
 
 func main() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-
-	client := pb.NewConsignmentServiceClient(conn)
+	cmd.Init()
+	s := pb.NewConsignmentService("cz.go.microservices.consignment", microclient.DefaultClient)
 
 	c, err := parseFile(defaultFilename)
 	if err != nil {
 		log.Fatalf("fail to parseFile: %v", err)
 	}
 
-	r, err := client.Create(context.Background(), c)
+	r, err := s.Create(context.TODO(), c)
 	if err != nil {
 		log.Fatalf("fail to Create: %v", err)
 	}
 	log.Printf("Created: %t", r.Result)
 
-	r, err = client.GetAll(context.Background(), &pb.EmptyRequest{})
+	r, err = s.GetAll(context.Background(), &pb.EmptyRequest{})
 	if err != nil {
 		log.Fatalf("fail to GetAll: %v", err)
 	}
