@@ -1,9 +1,10 @@
 package main
 
 import (
-	micro "github.com/micro/go-micro"
 	"context"
+	micro "github.com/micro/go-micro"
 	pb "github.com/myshippy/consignment-service/proto/consignment"
+	vesselPb "github.com/myshippy/vessel-service/proto/vessel"
 	//"google.golang.org/grpc"
 	//"google.golang.org/grpc/reflection"
 	"log"
@@ -24,23 +25,35 @@ func (r *Repository) GetAll() []*pb.Consignment {
 }
 
 type ConsignmentService struct {
-	repo *Repository
+	repo         Repository
+	vesselClient vesselPb.VesselService
 }
 
-func (s *ConsignmentService) Create(cxt context.Context, c *pb.Consignment, r *pb.Response) error{
+func (s *ConsignmentService) Create(cxt context.Context, c *pb.Consignment, r *pb.Response) error {
+	rep, err := s.vesselClient.GetAvailable(context.Background(), &vesselPb.Request{
+		Capacity:  int32(len(c.Containers)),
+		MaxWeight: c.Weight,
+	})
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Found vessel: %s \n", rep.Vessel.Name)
+	c.VesselId = rep.Vessel.Id
 	s.repo.Create(c)
-	r.Result=true
-	r.Consignment=c
+
+	r.Result = true
+	r.Consignment = c
 	return nil
 }
 
-func (s *ConsignmentService) GetAll(cxt context.Context, e *pb.EmptyRequest, r *pb.Response) error{
-	r.Result=true
-	r.Consignments=s.repo.GetAll()
+func (s *ConsignmentService) GetAll(cxt context.Context, e *pb.EmptyRequest, r *pb.Response) error {
+	r.Result = true
+	r.Consignments = s.repo.GetAll()
 	return nil
 }
 
-func main(){
+func main() {
 	s := micro.NewService(
 		micro.Name("cz.go.microservices.consignment"),
 		micro.Version("latest"),
@@ -48,7 +61,11 @@ func main(){
 
 	s.Init()
 
-	err := pb.RegisterConsignmentServiceHandler(s.Server(), &ConsignmentService{repo:&Repository{}})
+	handler := &ConsignmentService{
+		repo:         Repository{},
+		vesselClient: vesselPb.NewVesselService("cz.go.microservices.vessel", s.Client()),
+	}
+	err := pb.RegisterConsignmentServiceHandler(s.Server(), handler)
 	if err != nil {
 		log.Fatalf("fail to RegisterConsignmentServiceHandler: %v", err)
 	}

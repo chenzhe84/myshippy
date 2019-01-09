@@ -2,7 +2,8 @@
   "description": "This is a test consignment",
   "weight": 550,
   "containers": [
-    { "customer_id": "cust001", "user_id": "user001", "origin": "Manchester, United Kingdom" }
-  ],
-  "vessel_id": "vessel001"
+    { "customer_id": "cust001", "user_id": "user001", "origin": "Manchester, United Kingdom" },
+    { "customer_id": "cust002", "user_id": "user002", "origin": "LD, United Kingdom" },
+    { "customer_id": "cust003", "user_id": "user003", "origin": "BBC, United Kingdom" }
+  ]
 }

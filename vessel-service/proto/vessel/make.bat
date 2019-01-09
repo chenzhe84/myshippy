@@ -1,1 +1,1 @@
-protoc vessel.proto --micro_out=.
+protoc vessel.proto --go_out=. --micro_out=.

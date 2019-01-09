@@ -34,7 +34,7 @@ func main() {
 		log.Fatalf("fail to parseFile: %v", err)
 	}
 
-	r, err := s.Create(context.TODO(), c)
+	r, err := s.Create(context.Background(), c)
 	if err != nil {
 		log.Fatalf("fail to Create: %v", err)
 	}
